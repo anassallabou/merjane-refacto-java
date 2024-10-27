@@ -1,8 +1,6 @@
 package com.nimbleways.springboilerplate.services.implementations;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
 
 import com.nimbleways.springboilerplate.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,48 +39,6 @@ public class ProductService {
 
         sendingExprationNotification(p);
 
-    }
-
-    public void handlProductType(Set<Product> products){
-        for (Product p : products) {
-            switch (p.getType()){
-                case Constants.PRODUCT_TYPE_NORMAL -> handleIfProductTypeNormal(p);
-                case (Constants.PRODUCT_TYPE_SEASONAL) ->  handleIfProductTypeSeasonal(p);
-                case (Constants.PRODUCT_TYPE_EXPIRABLE) ->  handleIfProductTypeExpirable(p);
-                default -> throw new IllegalArgumentException("Invalid type of Product: " + p.getType());
-            }
-        }
-    }
-
-    private void handleIfProductTypeExpirable(Product p) {
-        if (p.getAvailable() > 0 && p.getExpiryDate().isAfter(LocalDate.now())) {
-            p.setAvailable(p.getAvailable() - Constants.oneToAbstruct);
-            productRepository.save(p);
-        } else {
-            handleExpiredProduct(p);
-        }
-    }
-
-    private void handleIfProductTypeSeasonal(Product p) {
-        if ((LocalDate.now().isAfter(p.getSeasonStartDate()) && LocalDate.now().isBefore(p.getSeasonEndDate())
-                && p.getAvailable() > Constants.zero)) {
-            p.setAvailable(p.getAvailable() - Constants.oneToAbstruct);
-            productRepository.save(p);
-        } else {
-            handleSeasonalProduct(p);
-        }
-    }
-
-    private void handleIfProductTypeNormal(Product p) {
-        if (p.getAvailable() > Constants.zero) {
-            p.setAvailable(p.getAvailable() - Constants.oneToAbstruct);
-            productRepository.save(p);
-        } else {
-            int leadTime = p.getLeadTime();
-            if (leadTime > Constants.zero) {
-                notifyDelay(leadTime, p);
-            }
-        }
     }
 
     private void seasonEndDateAfterTody(Product p) {
